@@ -1,12 +1,10 @@
-# sraplc
-
-Simple REST API for programming languages comparsion
+# DotNet - C#
 
 ## Objectives
 
 Just to demonstrate different ways to do a simple REST API in some programming languages.
 
-## Requirements on each language
+## Requirements
 
 - [ ] Be RESTful
 - [ ] Be simple
