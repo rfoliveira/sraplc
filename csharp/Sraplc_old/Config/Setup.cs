@@ -1,4 +1,5 @@
 using System.Net;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Data.Sqlite;
 using Sraplc.Models;
 using Sraplc.Repository;
@@ -15,7 +16,7 @@ public static class Setup
         var createStm = @"create table if not exists Todo (
             id integer primary key autoincrement, 
             description char(200) not null, 
-            status INTEGER not null
+            completed INTEGER not null
         )";
 
         using var cmd = new SqliteCommand(createStm, conn);
@@ -26,35 +27,36 @@ public static class Setup
 
     public static void MapTodoController(this WebApplication app)
     {
-        app.MapGet("/todo/{id}", async (ITodoRepository todoRepo, int id) => 
-            await todoRepo.ReadAsync(id) 
+        app.MapGet("/todo", IEnumerable<Todo> (ITodoRepository todoRepo) => 
+            todoRepo.ReadAll()
         )
-        .Produces((int)HttpStatusCode.BadRequest)
-        .Produces((int)HttpStatusCode.OK)
+        .WithName("Read all Todos")
+        .WithOpenApi();
+    
+        app.MapGet("/todo/{id}", Todo (ITodoRepository todoRepo, int id) => 
+            todoRepo.Read(id) 
+        )
         .WithName("Read Todo by ID")
         .WithOpenApi();
 
-        app.MapPost("/todo", async (ITodoRepository todoRepo, Todo todo) => 
-            await todoRepo.CreateAsync(todo) 
-        )
-        .Produces((int)HttpStatusCode.BadRequest)
+        app.MapPost("/todo", IResult (ITodoRepository todoRepo, Todo todo) => 
+        {
+            var result = todoRepo.Create(todo);
+            return TypedResults.Created("todo", result);
+        })
         .Produces((int)HttpStatusCode.Created)
         .WithName("Create Todo")
         .WithOpenApi();
         
-        app.MapPut("/todo", async (ITodoRepository todoRepo, Todo todo) => 
-            await todoRepo.UpdateAsync(todo) 
+        app.MapPut("/todo", int (ITodoRepository todoRepo, Todo todo) => 
+            todoRepo.Update(todo) 
         )
-        .Produces((int)HttpStatusCode.NotModified)
-        .Produces((int)HttpStatusCode.OK)
         .WithName("Update Todo")
         .WithOpenApi();
         
-        app.MapDelete("/todo/{id}", async (ITodoRepository todoRepo, int id) => 
-            await todoRepo.DeleteAsync(id) 
+        app.MapDelete("/todo/{id}", int (ITodoRepository todoRepo, int id) => 
+            todoRepo.Delete(id) 
         )
-        .Produces((int)HttpStatusCode.NotModified)
-        .Produces((int)HttpStatusCode.OK)
         .WithName("Delete Todo by ID")
         .WithOpenApi();
     }

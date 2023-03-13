@@ -1,83 +1,111 @@
 using Microsoft.Data.Sqlite;
 using Sraplc.Models;
+using Sraplc.Settings;
 
 namespace Sraplc.Repository;
 
 public class TodoRepository : ITodoRepository
 {
-    private const string _dbPath = @"Data Source=.\DB\csharp.db";
+    private readonly SqliteConnection _conn;
 
-    public async Task<int> CreateAsync(Todo todo)
+    public TodoRepository(IDbSettings dbSettings)
     {
-        using var connection = new SqliteConnection(_dbPath);
-        await connection.OpenAsync();
+        _conn = new SqliteConnection(dbSettings.SqliteDatabase);
+    }
 
-        var insertSQL = "insert into Todo (description, status) values (@description, @status)";
+    private void OpenConnection()
+    {
+        if (_conn.State == System.Data.ConnectionState.Closed)
+            _conn.Open();
+    }
 
-        using var cmd = new SqliteCommand(insertSQL, connection);
+    public int Create(Todo todo)
+    {
+        OpenConnection();
+
+        var sql = "insert into Todo (description, completed) values (@description, @completed)";
+
+        using var cmd = new SqliteCommand(sql, _conn);
         
         cmd.Parameters.AddWithValue("@description", todo.Description);
-        cmd.Parameters.AddWithValue("@status", todo.Status);
+        cmd.Parameters.AddWithValue("@completed", todo.Completed);
+        cmd.Prepare();
         
-        await cmd.PrepareAsync();
-        return await cmd.ExecuteNonQueryAsync();
+        return cmd.ExecuteNonQuery();
     }
 
-    public async Task<int> DeleteAsync(int id)
+    public int Delete(int id)
     {
-        using var connection = new SqliteConnection(_dbPath);
-        await connection.OpenAsync();
+        OpenConnection();
 
-        var insertSQL = "delete from Todo where id = @id";
+        var sql = "delete from Todo where id = @id";
 
-        using var cmd = new SqliteCommand(insertSQL, connection);
+        using var cmd = new SqliteCommand(sql, _conn);
         
         cmd.Parameters.AddWithValue("@id", id);
+        cmd.Prepare();
         
-        await cmd.PrepareAsync();
-        return await cmd.ExecuteNonQueryAsync();
+        return cmd.ExecuteNonQuery();
     }
 
-    public async Task<Todo> ReadAsync(int id)
-    {
-        using var connection = new SqliteConnection(_dbPath);
-        await connection.OpenAsync();
-
-        var insertSQL = "select * from Todo where id = @id";
-
-        using var cmd = new SqliteCommand(insertSQL, connection);
-        cmd.Parameters.AddWithValue("@id", id);
+    public IEnumerable<Todo> GetAll()
+    {      
+        OpenConnection();
         
-        await cmd.PrepareAsync();
-        var reader = await cmd.ExecuteReaderAsync();
-        Todo todo = new();
+        var sql = "select * from Todo order by id";
 
-        while (await reader.NextResultAsync())
+        using var cmd = new SqliteCommand(sql, _conn);
+
+        var reader = cmd.ExecuteReader();
+        var todos = new List<Todo>();
+
+        while (reader.Read())
         {
-            Console.WriteLine($"reader.GetInt32(0) = {reader.GetInt32(0)}, reader.GetString(1) = {reader.GetString(1)}, reader.GetBoolean(2) = {reader.GetBoolean(2)}");
-            todo.Id = reader.GetInt32(0);
-            todo.Description = reader.GetString(1);
-            todo.Status = reader.GetBoolean(2);
+            todos.Add(new Todo {
+                Id = reader.GetInt32(0),
+                Description = reader.GetString(1),
+                Completed = reader.GetBoolean(2)
+            });
         }
 
-        Console.WriteLine($"Todo: Id = {todo.Id}, Description = {todo.Description}, Status = {todo.Status}");
-        return await Task.FromResult(todo);
+        return todos;
     }
 
-    public async Task<int> UpdateAsync(Todo todo)
+    public Todo GetBy(int id)
     {
-        using var connection = new SqliteConnection(_dbPath);
-        await connection.OpenAsync();
+        OpenConnection();
 
-        var insertSQL = "update Todo set description = @description, status = @status where id = @id";
+        var sql = "select * from Todo where id = @id";
 
-        using var cmd = new SqliteCommand(insertSQL, connection);
+        using var cmd = new SqliteCommand(sql, _conn);
+        cmd.Parameters.AddWithValue("@id", id);
+        cmd.Prepare();
+
+        var reader = cmd.ExecuteReader();
+        Todo todo = new();
+
+        while (reader.Read())
+        {
+            todo.Id = reader.GetInt32(0);
+            todo.Description = reader.GetString(1);
+            todo.Completed = reader.GetBoolean(2);
+        }
+
+        return todo;
+    }
+
+    public int Update(Todo todo)
+    {
+        OpenConnection();
+
+        var sql = "update Todo set description = @description, completed = @completed where id = @id";
+
+        using var cmd = new SqliteCommand(sql, _conn);
         
         cmd.Parameters.AddWithValue("@description", todo.Description);
-        cmd.Parameters.AddWithValue("@status", todo.Status);
+        cmd.Parameters.AddWithValue("@completed", todo.Completed);
         cmd.Parameters.AddWithValue("@id", todo.Id);
         
-        await cmd.PrepareAsync();
-        return await cmd.ExecuteNonQueryAsync();
+        return cmd.ExecuteNonQuery();
     }
 }
