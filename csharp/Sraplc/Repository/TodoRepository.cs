@@ -16,10 +16,10 @@ public class TodoRepository : ITodoRepository
     private void OpenConnection()
     {
         if (_conn.State == System.Data.ConnectionState.Closed)
-            _conn.Open();
+            _conn.OpenAsync();
     }
 
-    public int Create(Todo todo)
+    public async Task<int> CreateAsync(Todo todo)
     {
         OpenConnection();
 
@@ -29,12 +29,12 @@ public class TodoRepository : ITodoRepository
         
         cmd.Parameters.AddWithValue("@description", todo.Description);
         cmd.Parameters.AddWithValue("@completed", todo.Completed);
-        cmd.Prepare();
+        await cmd.PrepareAsync();
         
-        return cmd.ExecuteNonQuery();
+        return await cmd.ExecuteNonQueryAsync();
     }
 
-    public int Delete(int id)
+    public async Task<int> DeleteAsync(int id)
     {
         OpenConnection();
 
@@ -43,12 +43,12 @@ public class TodoRepository : ITodoRepository
         using var cmd = new SqliteCommand(sql, _conn);
         
         cmd.Parameters.AddWithValue("@id", id);
-        cmd.Prepare();
+        await cmd.PrepareAsync();
         
-        return cmd.ExecuteNonQuery();
+        return await cmd.ExecuteNonQueryAsync();
     }
 
-    public IEnumerable<Todo> GetAll()
+    public async Task<IEnumerable<Todo>> GetAllAsync()
     {      
         OpenConnection();
         
@@ -56,10 +56,10 @@ public class TodoRepository : ITodoRepository
 
         using var cmd = new SqliteCommand(sql, _conn);
 
-        var reader = cmd.ExecuteReader();
+        var reader = await cmd.ExecuteReaderAsync();
         var todos = new List<Todo>();
 
-        while (reader.Read())
+        while (await reader.ReadAsync())
         {
             todos.Add(new Todo {
                 Id = reader.GetInt32(0),
@@ -68,10 +68,10 @@ public class TodoRepository : ITodoRepository
             });
         }
 
-        return todos;
+        return await Task.FromResult(todos);
     }
 
-    public Todo GetBy(int id)
+    public async Task<Todo> GetByAsync(int id)
     {
         OpenConnection();
 
@@ -79,22 +79,22 @@ public class TodoRepository : ITodoRepository
 
         using var cmd = new SqliteCommand(sql, _conn);
         cmd.Parameters.AddWithValue("@id", id);
-        cmd.Prepare();
+        await cmd.PrepareAsync();
 
-        var reader = cmd.ExecuteReader();
+        var reader = await cmd.ExecuteReaderAsync();
         Todo todo = new();
 
-        while (reader.Read())
+        while (await reader.ReadAsync())
         {
             todo.Id = reader.GetInt32(0);
             todo.Description = reader.GetString(1);
             todo.Completed = reader.GetBoolean(2);
         }
 
-        return todo;
+        return await Task.FromResult(todo);
     }
 
-    public int Update(Todo todo)
+    public async Task<int> UpdateAsync(Todo todo)
     {
         OpenConnection();
 
@@ -105,7 +105,8 @@ public class TodoRepository : ITodoRepository
         cmd.Parameters.AddWithValue("@description", todo.Description);
         cmd.Parameters.AddWithValue("@completed", todo.Completed);
         cmd.Parameters.AddWithValue("@id", todo.Id);
+        await cmd.PrepareAsync();
         
-        return cmd.ExecuteNonQuery();
+        return await cmd.ExecuteNonQueryAsync();
     }
 }

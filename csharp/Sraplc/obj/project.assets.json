@@ -787,11 +787,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "c:\\repo\\eu\\sraplc\\csharp\\Sraplc\\Sraplc.csproj",
+      "projectUniqueName": "C:\\repo\\eu\\sraplc\\csharp\\Sraplc\\Sraplc.csproj",
       "projectName": "Sraplc",
-      "projectPath": "c:\\repo\\eu\\sraplc\\csharp\\Sraplc\\Sraplc.csproj",
+      "projectPath": "C:\\repo\\eu\\sraplc\\csharp\\Sraplc\\Sraplc.csproj",
       "packagesPath": "C:\\Users\\rafael.foliveira\\.nuget\\packages\\",
-      "outputPath": "c:\\repo\\eu\\sraplc\\csharp\\Sraplc\\obj\\",
+      "outputPath": "C:\\repo\\eu\\sraplc\\csharp\\Sraplc\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\rafael.foliveira\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -852,7 +852,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.103\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.104\\RuntimeIdentifierGraph.json"
       }
     }
   }

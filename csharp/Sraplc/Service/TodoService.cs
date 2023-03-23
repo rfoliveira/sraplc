@@ -12,13 +12,13 @@ public class TodoService : ITodoService
         _repo = repo;
     }
 
-    public int Create(Todo todo) => _repo.Create(todo);
+    public async Task<int> CreateAsync(Todo todo) => await _repo.CreateAsync(todo);
 
-    public int Delete(int id) => _repo.Delete(id);
+    public async Task<int> DeleteAsync(int id) => await _repo.DeleteAsync(id);
 
-    public IEnumerable<Todo> GetAll() => _repo.GetAll();
+    public async Task<IEnumerable<Todo>> GetAllAsync() => await _repo.GetAllAsync();
 
-    public Todo GetBy(int id) => _repo.GetBy(id);
+    public async Task<Todo> GetByAsync(int id) => await _repo.GetByAsync(id);
 
-    public int Update(Todo todo) => _repo.Update(todo);
+    public async Task<int> UpdateAsync(Todo todo) => await _repo.UpdateAsync(todo);
 }

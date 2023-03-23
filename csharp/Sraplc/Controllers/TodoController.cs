@@ -18,25 +18,25 @@ public class TodoController : ControllerBase
     
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<Todo>), StatusCodes.Status200OK)]
-    public IActionResult GetAll() => Ok(_service.GetAll());
+    public async Task<IActionResult> GetAllAsync() => await Task.FromResult(Ok(await _service.GetAllAsync()));
 
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(Todo), StatusCodes.Status200OK)]
-    public IActionResult GetBy(int id) => Ok(_service.GetBy(id));
+    public async Task<IActionResult> GetByAsync(int id) => await Task.FromResult(Ok(await _service.GetByAsync(id)));
 
     [HttpPost]
     [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
-    public IActionResult Create(Todo todo) => Created("", _service.Create(todo));
+    public async Task<IActionResult> CreateAsync(Todo todo) => await Task.FromResult(Created("", await _service.CreateAsync(todo)));
 
     [HttpPut]
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
-    public IActionResult Update(Todo todo) => Ok(_service.Update(todo));
+    public async Task<IActionResult> UpdateAsync(Todo todo) => await Task.FromResult(Ok(await _service.UpdateAsync(todo)));
 
     [HttpDelete("{id}")]
     [ProducesResponseType(typeof(int), StatusCodes.Status204NoContent)]
-    public IActionResult Delete(int id) 
+    public async Task<IActionResult> DeleteAsync(int id) 
     {
-        _service.Delete(id);        
-        return NoContent();
+        await _service.DeleteAsync(id);        
+        return await Task.FromResult(NoContent());
     }
 }

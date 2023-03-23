@@ -4,9 +4,9 @@ namespace Sraplc.Repository;
 
 public interface ITodoRepository
 {
-    IEnumerable<Todo> GetAll();
-    Todo GetBy(int id);
-    int Create(Todo todo);
-    int Update(Todo todo);
-    int Delete(int id);
+    Task<IEnumerable<Todo>> GetAllAsync();
+    Task<Todo> GetByAsync(int id);
+    Task<int> CreateAsync(Todo todo);
+    Task<int> UpdateAsync(Todo todo);
+    Task<int> DeleteAsync(int id);
 }
